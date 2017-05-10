@@ -1,3 +1,5 @@
+"use strict"
+
 var width, height, fps;
 function init(w,h,f)	{
 	width = w;
@@ -23,11 +25,12 @@ var world = {
     }
 }
 
-function sound(path)	{
+function sound(path,loop)	{
 	this.audio = document.createElement("audio"),
 	this.audio.src = path;
 	this.audio.setAttribute("preload","auto");
 	this.audio.style.display = "none";
+	this.audio.loop = loop;
 	document.body.appendChild(this.audio);
 	this.play = function()	{
 		this.audio.play();
@@ -37,11 +40,12 @@ function sound(path)	{
 	}
 }
 
-function image(width, height, path, x, y) {
+function image(width, height, path, x, y, scale) {
     this.image = new Image();
     this.image.src = path;
     this.width = width;
     this.height = height;
+	this.scale = scale;
     this.speedX = 0;
     this.speedY = 0;
     this.x = x;
@@ -56,7 +60,8 @@ function image(width, height, path, x, y) {
         ctx.drawImage(this.image,
         this.x,
         this.y,
-        this.width, this.height);
+        this.width*this.scale,
+		this.height*this.scale);
     }
 	this.setGravity = function(g)	{
 		this.gravity = g;
@@ -103,8 +108,9 @@ function sprite(swidth, sheight, sx, sy, width, height, path, x, y, totalframe, 
 	this.sx = sx;
 	this.sy = sy;
 	this.index = 0;
-    this.width = width;
-    this.height = height;
+	this.widthoffset = width;
+    this.width = width * this.scale;
+    this.height = height * this.scale;
     this.speedX = 0;
     this.speedY = 0;
     this.x = x;
@@ -116,16 +122,16 @@ function sprite(swidth, sheight, sx, sy, width, height, path, x, y, totalframe, 
     this.update = function() {
 		var ctx = world.context;
 		this.newPos();
-		this.offset = this.index % this.totalframe + 1;
+		this.offset = this.index % this.totalframe;
         ctx.drawImage(this.image,
-		this.sx + this.offset * this.width,
+		this.sx + this.offset * this.widthoffset,
 		0,
 		this.swidth,
 		this.sheight,
         this.x,
         this.y,
-        this.width * this.scale,
-		this.height * this.scale);
+        this.width,
+		this.height);
 		if(world.frameNo%this.delay == 0)	{
 			this.index += 1;
 		}
